@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blow the Candle</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f3d6db; /* Light pink background */
+            margin: 0;
+            font-family: "Papyrus", fantasy;
+            position: relative;
+            overflow: hidden; /* Hide overflow to prevent horizontal scrollbar */
+        }
+
+        .balloon {
+            position: absolute;
+            width: 100px; 
+            height: auto; 
+            z-index: -1; 
+            opacity: 0; 
+        }
+
+        .balloon.move-up {
+            animation: moveUp 10s linear infinite, fadeIn 0.5s forwards; 
+        }
+
+        @keyframes moveUp {
+            0% {
+                opacity: 0; 
+                transform: translateY(100vh); 
+            }
+            10% {
+                opacity: 1; 
+            }
+            100% {
+                transform: translateY(-100px);
+            }
+        }
+
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .container {
+            text-align: center;
+            background-color: #fff; 
+            padding: 30px;
+            border-radius: 20px; 
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+        }
+
+        #candle {
+            width: 300px;
+            height: auto;
+            border-radius: 10px; 
+        }
+
+        p {
+            margin-top: 20px;
+            font-size: 1.2em;
+            color: #db7a7ae1; 
+        }
+
+        #message {
+            display: none;
+            margin-top: 20px;
+            font-size: 1.5em;
+            color: #e7d55bec; 
+            font-family: "Lucida Handwriting", cursive;
+        }
+
+        #startButton {
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            background-color: #ff6781; /* Soft pink button background */
+            color: #fff; /* White text color */
+            border: none;
+            border-radius: 5px; /* Rounded corners */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Soft button shadow */
+            transition: background-color 0.3s ease; /* Smooth transition */
+        }
+
+        #startButton:hover {
+            background-color: #ff5181; /* Darker pink on hover */
+        }
+    </style>
+</head>
+<body>
+    <!-- Balloons -->
+    <img class="balloon move-up" src="balloon.gif" alt="Balloon" style="left: 20%; animation-delay: 1s;">
+    <img class="balloon move-up" src="balloon1.gif" alt="Balloon" style="left: 50%; animation-delay: 3s;">
+    <img class="balloon move-up" src="balloon5.gif" alt="Balloon" style="left: 60%; animation-delay: 5s;">
+    <img class="balloon move-up" src="balloon1.gif" alt="Balloon" style="left: 70%; animation-delay:7s;">
+    <img class="balloon move-up" src="balloon2.gif" alt="Balloon" style="left: 30%; animation-delay:4s;">
+    <img class="balloon move-up" src="balloon3.gif" alt="Balloon" style="left: 10%; animation-delay:2s;">
+    <img class="balloon move-up" src="balloon4.gif" alt="Balloon" style="left: 80%; animation-delay:8s;">
+    <img class="balloon move-up" src="balloon6.gif" alt="Balloon" style="left: 90%; animation-delay:9s;">
+
+
+    <div class="container">
+        <img id="candle" src="candle1.gif" alt="Candle"> 
+        <p>Blow the candle! <img src="present.gif" alt="Dog pop out" style="width: 50px; height: auto;"></p>
+        <p id="message">Happy 21st Birthday Phebe! Hope you like it heheh&#128521 <br>May you always be the pretty and happy girl that I know and may our friendships last forever.&#129392</p>
+        <button id="startButton">Start</button>
+    </div>
+    <script>
+        async function init() {
+            try {
+                const candleImage = document.getElementById('candle');
+                const message = document.getElementById('message');
+                const startButton = document.getElementById('startButton');
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+                startButton.addEventListener('click', async () => {
+                    await audioContext.resume(); // Resume the audio context after user gesture
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    const mediaStreamSource = audioContext.createMediaStreamSource(stream);
+                    const analyser = audioContext.createAnalyser();
+
+                    mediaStreamSource.connect(analyser);
+                    analyser.fftSize = 256;
+                    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+                    function detectBlow() {
+                        analyser.getByteFrequencyData(dataArray);
+                        const volume = dataArray.reduce((a, b) => a + b) / dataArray.length;
+                        console.log('Volume:', volume); 
+
+                        if (volume > 100) {
+                            console.log('Blow detected!');
+                            candleImage.src = "candle2.gif"; 
+                            const blowMessage = document.querySelector('p');
+                            const presentGif = document.querySelector('p img');
+                            blowMessage.style.display = 'none'; 
+                            presentGif.style.display = 'none';
+                            message.style.display = 'block'; 
+                        }
+                        
+
+                        requestAnimationFrame(detectBlow);
+                    }
+
+                    detectBlow();
+                });
+            } catch (err) {
+                console.error('Error accessing microphone:', err);
+            }
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
