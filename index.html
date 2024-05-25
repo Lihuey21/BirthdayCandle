@@ -137,7 +137,7 @@
                         const volume = dataArray.reduce((a, b) => a + b) / dataArray.length;
                         console.log('Volume:', volume); 
 
-                        if (volume > 100) {
+                        if (volume > 50) {
                             console.log('Blow detected!');
                             candleImage.src = "candle2.gif"; 
                             const blowMessage = document.querySelector('p');
